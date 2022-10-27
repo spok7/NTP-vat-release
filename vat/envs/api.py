@@ -2,14 +2,14 @@
 Neural Program APIs for NTP
 """
 
-from sim_world import SimWorld
+from .sim_world import SimWorld
 try:
     from robot_world import RobotWorld
 except ImportError:
     RobotWorld = object
     print('Robot World cannot be imported')
 import time
-from npi_view import NPIView
+from .npi_view import NPIView
 import numpy as np
 import threading
 np.random.seed(10)
@@ -446,7 +446,7 @@ def get_task_world(task_name, real=False):
                 curr_task_specs = self.task_specs
 
             for ts in curr_task_specs:
-                if ts.has_key("count"):
+                if "count" in ts:
                     count = ts['count']
                 else:
                     count = 9999
@@ -487,7 +487,7 @@ def get_task_world(task_name, real=False):
         def task_done(self):
             for c in self.end_constraints:
                 s, ns = self.satisfied(c)
-                if c.has_key('count'):
+                if 'count' in c:
                     return ns == c['count']
                 if not s:
                     return False

@@ -1,5 +1,5 @@
 import numpy as np
-from base_interface import BaseInterface
+from .base_interface import BaseInterface
 from builtins import range
 
 OFFSETS = {'gripper_z': np.array([0, 0, 0.32])}

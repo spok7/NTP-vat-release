@@ -47,7 +47,7 @@ class World(object):
             # Build uncontrollable bodies
             robot = get_robot(self.pe, robot_descr, self._data_dir)
             self._robots[robot.name] = robot
-            for body_name, body in robot.bodies.items():
+            for body_name, body in list(robot.bodies.items()):
                 self._bodies[body_name] = body
         # Set gravity
         self.pe.set_gravity(self.w['gravity'])
@@ -80,7 +80,7 @@ class World(object):
         euler = descr['pose']['rpy']
         frame = None
         if descr['frame'] is not None:
-            for body_name, body in self.bodies.items():
+            for body_name, body in list(self.bodies.items()):
                 if body_name == descr['frame']:
                     frame = body
                     break
@@ -107,7 +107,7 @@ class World(object):
         # Find the robot
         if robot is None:
             ind = len(self._ctrl_listeners)
-            robot = self.robots.values()[ind]
+            robot = list(self.robots.values())[ind]
         elif type(robot) == str:
             robot = self.robots[robot]
         else:

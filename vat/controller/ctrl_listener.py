@@ -29,10 +29,10 @@ class CrtlListener(object):
 
         events = self._events_fetcher()
         if debug and len(events) > 0:
-            print events
+            print(events)
 
         for e in events:
-            if self._handlers.has_key(e):
+            if e in self._handlers:
                 self._handlers[e]()
 
     def _default_events_fetcher(self):
@@ -70,10 +70,10 @@ class KeyListener(CrtlListener):
         events = self._events_fetcher()
         events = self._process_events(events)
         if debug and len(events) > 0:
-            print events
+            print(events)
 
         for e in events:
-            if self._handlers.has_key(e):
+            if e in self._handlers:
                 handler, delay = self._handlers[e]
                 t = time.time()
                 if t >= self._records[e] + delay:
@@ -119,8 +119,8 @@ class KeyListener(CrtlListener):
     def keys(self):
         if self._keys is None:
             keys = []
-            for i in xrange(128):
-                keys.append(str(unichr(i)))
+            for i in range(128):
+                keys.append(str(chr(i)))
             keys.append('LEFT')
             keys.append('RIGHT')
             keys.append('UP')

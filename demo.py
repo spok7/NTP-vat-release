@@ -48,7 +48,7 @@ def main():
     world_path = args.scene
 
     # Process data directory
-    print('Data will be loaded from `{:s}`.'.format(args.data_dir))
+    print(('Data will be loaded from `{:s}`.'.format(args.data_dir)))
 
     # camera params
     camera_params = {
@@ -102,7 +102,7 @@ def main():
                 assert(bw.task_done)
             bw.reset_world()
             bw.start_task()
-            print(task['id'])
+            print((task['id']))
 
     print('Terminating the simulation...')
     world.close()

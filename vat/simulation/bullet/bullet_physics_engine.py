@@ -98,7 +98,7 @@ class BulletPhysicsEngine(PhysicsEngine):
     @staticmethod
     def get_link_uids(body):
         # Links and Joints have the corresponding UIDs
-        link_uids = range(p.getNumJoints(body))
+        link_uids = list(range(p.getNumJoints(body)))
         return link_uids
 
     @staticmethod
@@ -121,7 +121,7 @@ class BulletPhysicsEngine(PhysicsEngine):
 
     @staticmethod
     def get_joint_uids(body):
-        joint_uids = range(p.getNumJoints(body))
+        joint_uids = list(range(p.getNumJoints(body)))
         return joint_uids
 
     @staticmethod

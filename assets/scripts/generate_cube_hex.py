@@ -7,7 +7,7 @@ from PIL import (Image,
                  ImageDraw,
                  ImageFont
                  )
-import StringIO
+import io
 import sys, os, getopt
 from os.path import join as pjoin
 from shutil import copyfile
@@ -27,7 +27,7 @@ def generate_cube(name, c, a=None):
     # draw the text onto the text canvas, and use black as the text color
     draw = ImageDraw.Draw(canvas)
     if a:
-        draw.text((70, 20), unicode(a), font=font, fill="#000000")
+        draw.text((70, 20), str(a), font=font, fill="#000000")
 
     # save the blank canvas to a file
     canvas.save('{}.png'.format(cube_name), 'PNG')
@@ -67,7 +67,7 @@ def run(argv):
     r, g, b = 255, 255, 255
     # One minute of data
     a = None
-    print(sys.argv)
+    print((sys.argv))
 
     generate_cube(sys.argv[1], sys.argv[2], sys.argv[3])
 

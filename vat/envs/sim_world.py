@@ -3,7 +3,7 @@ Simulated environment wrapper
 """
 
 import numpy as np
-from base_world import BaseWorld
+from .base_world import BaseWorld
 from builtins import range
 
 

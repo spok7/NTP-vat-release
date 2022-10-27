@@ -3,7 +3,7 @@ import numpy as np
 import pybullet as p
 
 from ..world import World
-from bullet_physics_engine import BulletPhysicsEngine
+from .bullet_physics_engine import BulletPhysicsEngine
 
 
 class BulletWorld(World):
@@ -130,8 +130,8 @@ class BulletWorld(World):
         # Map event id to key name
         if self._key_dict is None:
             key_dict = {}
-            for i in xrange(128):
-                key_dict[i] = str(unichr(i))
+            for i in range(128):
+                key_dict[i] = str(chr(i))
             key_dict[65295] = 'LEFT'
             key_dict[65296] = 'RIGHT'
             key_dict[65297] = 'UP'
@@ -157,10 +157,10 @@ class BulletWorld(World):
             self._modifier_dict = modifier_dict
         # Decode events
         events = []
-        for key, key_act in bullet_events.items():
-            if self._key_dict.has_key(key):
+        for key, key_act in list(bullet_events.items()):
+            if key in self._key_dict:
                 key_name = self._key_dict[key]
-            elif self._modifier_dict.has_key(key):
+            elif key in self._modifier_dict:
                 key_name = self._modifier_dict[key]
             else:
                 key_name = None

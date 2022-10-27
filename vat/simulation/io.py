@@ -1,7 +1,7 @@
 import numpy as np
 import xml.etree.cElementTree as ET
 
-from spec import spec_root
+from .spec import spec_root
 
 
 def parse_world_from_file(path):
@@ -59,7 +59,7 @@ def _parse_element(spec_node, xml_node):
     # Parse attributes
     for spec_attrib in spec_node['attrib']:
         key = spec_attrib['name']
-        if xml_node.attrib.has_key(key):
+        if key in xml_node.attrib:
             descr_node[key] = _parse_text(xml_node.attrib[key],
                     spec_attrib['type'])
         else:

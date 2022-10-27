@@ -166,7 +166,7 @@ class BaseWorld(object):
         return None
 
     def get_task_object(self, query):
-        if isinstance(query, basestring):
+        if isinstance(query, str):
             query = self.name_to_ind(query)
         return self.task_objects[query]
 

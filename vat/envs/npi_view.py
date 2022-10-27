@@ -79,7 +79,7 @@ class NPIView:
         self.push_trace(trace)
 
         # add to serialized trace log
-        for k, v in trace.items():
+        for k, v in list(trace.items()):
             # initialization of the dictionry
             if k not in self.all_trace[pname]:
                 self.all_trace[pname][k] = [[]]
@@ -159,7 +159,7 @@ class NPIView:
 
         # record end boundary of this program sequence
         pname, psid, _ = trace_ptr
-        for i in xrange(len(self.all_trace[pname]['in_boundary_end'][psid])):
+        for i in range(len(self.all_trace[pname]['in_boundary_end'][psid])):
             self.all_trace[pname]['in_boundary_end'][
                 psid][i] = self.current_frame + 1
             self.all_trace[pname]['cmd_in_boundary_end'][
@@ -234,7 +234,7 @@ class NPIView:
             return None
 
         if self.isrobot:
-            use = raw_input("Use Demo (yes/no)?")
+            use = input("Use Demo (yes/no)?")
             if use == "no":
                 return None
 
@@ -253,7 +253,7 @@ class NPIView:
                 serial_trace[k].append([])
 
             for trace in seq_trace:
-                for k, v in trace.items():
+                for k, v in list(trace.items()):
                     serial_trace[k][-1].append(v)
 
         return serial_trace
@@ -261,11 +261,11 @@ class NPIView:
     def trace_sanity_check(self):
         assert (not self.trace_stack)
 
-        for p, pentry in self.all_trace.items():
+        for p, pentry in list(self.all_trace.items()):
             num_seq = len(pentry['in_prgs'])
-            for i in xrange(num_seq):
+            for i in range(num_seq):
                 seq_len = len(pentry['in_prgs'][i])
-                for j in xrange(seq_len):
+                for j in range(seq_len):
                     caller_ptr = pentry['caller_ptr'][i][j]
                     if caller_ptr is None:
                         continue

@@ -1,6 +1,6 @@
 from vat.simulation import get_world
-from api import get_api, get_task_world
-from bullet_interface import BulletInterface
+from .api import get_api, get_task_world
+from .bullet_interface import BulletInterface
 
 
 class BulletEnv:
@@ -26,7 +26,7 @@ class BulletEnv:
                                random_task=config['random_task'])
 
         self.api = get_api(config['api'])(self.world, config['full_demo'])
-        print('API: %s' % config['api'])
+        print(('API: %s' % config['api']))
 
         for act in self.api.ACT:
             assert(act in self.program_names)
