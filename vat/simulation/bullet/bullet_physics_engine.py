@@ -105,7 +105,7 @@ class BulletPhysicsEngine(PhysicsEngine):
     def get_link_name(body, link):
         # Links and Joints have the corresponding UIDs
         _, joint_name, joint_type, _, _, _, damping, friction, \
-                lower, upper, max_force, max_vel, _ = \
+                lower, upper, max_force, max_vel, _, axis, _, _, _ = \
                 p.getJointInfo(body, link)
         return joint_name # TODO
 
@@ -128,7 +128,7 @@ class BulletPhysicsEngine(PhysicsEngine):
     def get_joint_name(body, joint):
         # Links and Joints have the corresponding UIDs
         _, joint_name, joint_type, _, _, _, damping, friction, \
-                lower, upper, max_force, max_vel, _ = \
+                lower, upper, max_force, max_vel, _, axis, _, _, _ = \
                 p.getJointInfo(body, joint)
         return joint_name
 
@@ -136,7 +136,7 @@ class BulletPhysicsEngine(PhysicsEngine):
     def get_joint_dynamics(body, joint):
         # Links and Joints have the corresponding UIDs
         _, joint_name, joint_type, _, _, _, damping, friction, \
-                lower, upper, max_force, max_vel, _ = \
+                lower, upper, max_force, max_vel, _, axis, _, _, _ = \
                 p.getJointInfo(body, joint)
         dynamics = {
                 'damping': damping,
@@ -148,7 +148,7 @@ class BulletPhysicsEngine(PhysicsEngine):
     def get_joint_limit(body, joint):
         # Links and Joints have the corresponding UIDs
         _, joint_name, joint_type, _, _, _, damping, friction, \
-                lower, upper, max_force, max_vel, _ = \
+                lower, upper, max_force, max_vel, _, axis, _, _, _ = \
                 p.getJointInfo(body, joint)
         limit = {
                 'lower': lower,
@@ -282,7 +282,7 @@ class BulletPhysicsEngine(PhysicsEngine):
 
     @staticmethod
     def get_cstr_dof(cstr):
-        _, _, _, _, _, _, _, pos, _, quat, max_force = p.getConstraintInfo(cstr)
+        _, _, _, _, _, _, _, pos, _, quat, max_force, _, _, _, _ = p.getConstraintInfo(cstr)
         pos = np.array(pos, dtype=np.float32)
         euler = p.getEulerFromQuaternion(quat)
         euler = np.array(euler, dtype=np.float32)
@@ -290,7 +290,7 @@ class BulletPhysicsEngine(PhysicsEngine):
 
     @staticmethod
     def get_cstr_max_force(cstr):
-        _, _, _, _, _, _, _, pos, _, quat, max_force = p.getConstraintInfo(cstr)
+        _, _, _, _, _, _, _, pos, _, quat, max_force, _, _, _, _ = p.getConstraintInfo(cstr)
         return np.array(max_force, dtype=np.float32)
 
     @staticmethod

@@ -86,7 +86,7 @@ class Robot(Entity):
             parent_frame_quat=None, child_frame_quat=None, name=None):
         """Add a joint constraint."""
         cstr = {
-                'name': '{:s}/{:s}'.format(self._name, name),
+                'name': f'{self._name}/{name}',
                 'parent_body': parent_body,
                 'parent_link': parent_link,
                 'child_body': child_body,
@@ -265,7 +265,7 @@ class Gripper(Robot):
     def release(self):
         self._state = 0
         """Release the gripper."""
-        left_joint = self.bodies['gripper'].joints['left_gripper_joint']
+        left_joint = self.bodies['gripper'].joints[b'left_gripper_joint']
         left_joint.control_pos(left_joint.limit['upper'])
-        right_joint = self.bodies['gripper'].joints['right_gripper_joint']
+        right_joint = self.bodies['gripper'].joints[b'right_gripper_joint']
         right_joint.control_pos(right_joint.limit['upper'])
