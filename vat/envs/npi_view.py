@@ -243,6 +243,64 @@ class NPIView:
 
         return self.all_trace, serial_depth_trace, self.state_log
 
+    def call_model_helper(self, pname, args, caller_ptr=None, command=None):
+        """format the trace for the next program and call the expert program"""
+        # call the expert program
+        callee_trace = self.trace
+        callee_trace['caller_ptr'] = caller_ptr
+        callee_trace['adaptive'] = int(pname in self.ADAPTIVE)
+        callee_trace['in_prgs'] = self.program_to_ind[pname]
+        callee_trace['in_args'] = args if args else 0
+        callee_trace['in_boundary_begin'] = self.current_frame
+        callee_trace['cmd_in_boundary_begin'] = self.current_command
+        self.psid[pname] += 1
+        callee_trace['psid'] = self.psid[pname]
+
+        if command:
+            self.command(command)
+        if pname == "pick_place":
+            self.curr_task, n_remain = self.world.next_task()
+        self.expert_programs[pname](callee_trace)
+    
+    def model_program_trace(self, model=None):
+        """
+        entry point
+        args:
+            pname: entry program
+            args: argument of entry program
+        """
+        pid, args = self.entry_point
+        pname = self.program_names[pid]
+
+        # initialization
+        self.psid = {}
+        self.all_trace = {}
+        self.depth_trace = []
+        self.trace_stack = [[]]
+        self.success = True
+        for n in self.program_names:
+            self.psid[n] = -1
+            self.all_trace[n] = defaultdict(list)
+
+        self.state_log = deepcopy(self._state_log_tmp)
+        self.observe()
+
+        # call root program
+        self.call_model_helper(pname, args)
+        if not self.success:
+            print('demo failed')
+            return None
+
+        if self.isrobot:
+            use = input("Use Demo (yes/no)?")
+            if use == "no":
+                return None
+
+        self.trace_sanity_check()
+        serial_depth_trace = self.serialize_depth_trace()
+
+        return self.all_trace, serial_depth_trace, self.state_log
+
     def serialize_depth_trace(self):
         serial_trace = {}
         for k in self.trace:

@@ -14,6 +14,8 @@ import numpy as np
 import threading
 np.random.seed(10)
 
+VERBOSE = False
+
 
 def get_api(api_name):
     """
@@ -118,10 +120,13 @@ class FullAPI(NPIView):
             return (self.program_to_ind['stack'], 0)
         elif self.world.task_name == 'sorting':
             return (self.program_to_ind['sorting'], 0)
+        elif self.world.task_name == 'pick_place':
+            return (self.program_to_ind['pick_place'], 0)
         else:
             raise NotImplementedError('unimplemented task')
 
     def program_move(self, target, full_demo=False):
+        if VERBOSE: print(f"\t\tprogram_move called with target {target}")
         if full_demo:
             self.world.set_callback(self.observe, 100)
         r, d, s = self.world.action_move_to(target)
@@ -130,6 +135,7 @@ class FullAPI(NPIView):
         return r, d, s
 
     def program_move_grasp(self, args=None, full_demo=False):
+        if VERBOSE: print("\t\tprogram_grasp called")
         nstep = self.world.stats['n_step']
         if nstep < len(self.world.task):
             curr_task = self.world.task[nstep]
@@ -147,6 +153,7 @@ class FullAPI(NPIView):
         return self.world.action_noop()
 
     def program_move_drop(self, args=None, full_demo=False):
+        if VERBOSE: print("\t\tprogram_move_drop called")
         nstep = self.world.stats['n_step']
         if nstep < len(self.world.task):
             curr_task = self.world.task[nstep]
@@ -167,6 +174,7 @@ class FullAPI(NPIView):
         return self.world.action_noop()
 
     def program_move_release(self, args=None, full_demo=False):
+        if VERBOSE: print("\t\tprogram_move_release called")
         nstep = self.world.stats['n_step']
         if nstep < len(self.world.task):
             curr_task = self.world.task[nstep]
@@ -194,9 +202,11 @@ class FullAPI(NPIView):
         return out
 
     def program_noop(self):
+        if VERBOSE: print("\t\tprogram_noop called")
         return self.world.action_noop()
 
     def expert_stack(self, trace):
+        if VERBOSE: print("expert_stack called")
         if self.isrobot:
             self.stop_obs = False
             self.obs = Observer(self)
@@ -218,6 +228,7 @@ class FullAPI(NPIView):
         # del self.obs
 
     def expert_sorting(self, trace):
+        if VERBOSE: print("expert_sorting called")
         while True:
             self.curr_task, n_remain = self.world.next_task()
             if n_remain == 0:
@@ -235,66 +246,78 @@ class FullAPI(NPIView):
         self.success = self.world.task_done
 
     def expert_pick_place(self, trace):
+        if VERBOSE: print("\texpert_pick_place called")
         self.call_expert(trace, 'pick', command=['pick'])
         self.call_expert(trace, 'place', command=['place'], stop=True)
 
     def expert_pick_press(self, trace):
+        if VERBOSE: print("\texpert_pick_press called")
         self.call_expert(trace, 'pick', command=['pick'])
         self.call_expert(trace, 'press', command=['press'], stop=True)
 
     def expert_pick_release(self, trace):
+        if VERBOSE: print("\texpert_pick_release called")
         self.call_expert(trace, 'pick', command=['pick'])
         self.call_expert(trace, 'release', command=['release'], stop=True)
 
     def expert_pick(self, trace):
+        if VERBOSE: print("\texpert_pick called")
         pick_name = self.curr_task['src']
         pick_target = self.world.name_to_ind(pick_name)
         self.call_expert(trace, 'move', pick_target)
         self.call_expert(trace, 'move_grasp', stop=True)
 
     def expert_press(self, trace):
+        if VERBOSE: print("\texpert_press called")
         place_name = self.curr_task['target']
         place_target = self.world.name_to_ind(place_name)
         self.call_expert(trace, 'move', place_target)
         self.call_expert(trace, 'move_press', stop=True)
 
     def expert_place(self, trace):
+        if VERBOSE: print("\texpert_place called")
         place_name = self.curr_task['target']
         place_target = self.world.name_to_ind(place_name)
         self.call_expert(trace, 'move', place_target)
         self.call_expert(trace, 'move_drop', stop=True)
 
     def expert_release(self, trace):
+        if VERBOSE: print("\texpert_release called")
         place_name = self.curr_task['target']
         place_target = self.world.name_to_ind(place_name)
         self.call_expert(trace, 'move', place_target)
         self.call_expert(trace, 'move_release', stop=True)
 
     def expert_move(self, trace):
+        if VERBOSE: print("\texpert_move called", end="\t")
         caller_ptr, trace_ptr = self.call_stop(trace)
         self.program_move(trace['in_args'], full_demo=self.full_demo)
         self.observe()
         self.append_trace(caller_ptr, trace_ptr)
 
     def expert_move_grasp(self, trace):
+        if VERBOSE: print("\texpert_move_grasp called", end="\t")
         caller_ptr, trace_ptr = self.call_stop(trace)
         self.program_move_grasp(trace['in_args'], full_demo=self.full_demo)
         self.observe()
         self.append_trace(caller_ptr, trace_ptr)
 
     def expert_move_release(self, trace):
+        if VERBOSE: print("\texpert_move_release called", end="\t")
         caller_ptr, trace_ptr = self.call_stop(trace)
         self.program_move_release(trace['in_args'], full_demo=self.full_demo)
         self.append_trace(caller_ptr, trace_ptr)
         self.observe()  # for sorting, make train and eval consistent
 
     def expert_move_press(self, trace):
+        if VERBOSE: print("\texpert_move_press called", end="\t")
         caller_ptr, trace_ptr = self.call_stop(trace)
         self.program_move_press(trace['in_args'], full_demo=self.full_demo)
         self.append_trace(caller_ptr, trace_ptr)
         self.observe()  # for sorting, make train and eval consistent
 
     def expert_move_drop(self, trace):
+        if VERBOSE: print("\texpert_move_drop called", end="\t")
         caller_ptr, trace_ptr = self.call_stop(trace)
         self.program_move_drop(trace['in_args'], full_demo=self.full_demo)
         self.observe()
@@ -319,6 +342,7 @@ class FlatAPI(FullAPI):
     def programs(self):
         return [('stack', self.program_noop),
                 ('sorting', self.program_noop),
+                ('pick_place', self.program_noop),
                 ('move', self.program_move),
                 ('move_grasp', self.program_move_grasp),
                 ('move_drop', self.program_move_drop),
@@ -328,13 +352,14 @@ class FlatAPI(FullAPI):
     def expert_programs(self):
         return {'stack': self.expert_stack,
                 'sorting': self.expert_sorting,
+                'pick_place': self.expert_pick_place,
                 'move': self.expert_move,
                 'move_grasp': self.expert_move_grasp,
                 'move_drop': self.expert_move_drop,
                 'move_release': self.expert_move_release}
 
     def expert_stack(self, trace):
-        # print "STARINT STACK"
+        if VERBOSE: print("flat expert_stack called")
         while True:
             curr_task, n_remain = self.world.next_task()
             if n_remain == 0:
@@ -350,6 +375,9 @@ class FlatAPI(FullAPI):
             self.call_expert(trace, 'move', place_target)
             self.call_expert(trace, 'move_drop', command=['place'])
 
+            
+            if VERBOSE: print("stack subtask done; continuing...\n")
+
             if not self.success:
                 break
 
@@ -358,6 +386,7 @@ class FlatAPI(FullAPI):
         self.success = self.world.task_done
 
     def expert_sorting(self, trace):
+        if VERBOSE: print("flat expert_sort called")
         while True:
             curr_task, n_remain = self.world.next_task()
             if n_remain == 0:
@@ -381,6 +410,24 @@ class FlatAPI(FullAPI):
         caller_ptr, trace_ptr = self.call_stop(trace)  # end of program
         self.append_trace(caller_ptr, trace_ptr)
         self.success = self.world.task_done
+        
+    def expert_pick_place(self, trace):
+        if VERBOSE: print("flat expert_pick_place called")
+
+        pick_name = self.curr_task['src']
+        place_name = self.curr_task['target']
+        pick_target = self.world.name_to_ind(pick_name)
+        place_target = self.world.name_to_ind(place_name)
+
+        # the command=[''] may be unneccessary
+        self.call_expert(trace, 'move', pick_target)
+        self.call_expert(trace, 'move_grasp', command=['pick'])
+        self.call_expert(trace, 'move', place_target)
+        self.call_expert(trace, 'move_drop', command=['place'])
+
+        caller_ptr, trace_ptr = self.call_stop(trace)  # end of program
+        self.append_trace(caller_ptr, trace_ptr)
+        self.success = self.world.task_done
 
     @property
     def ACT(self):
@@ -388,7 +435,7 @@ class FlatAPI(FullAPI):
 
     @property
     def ADAPTIVE(self):
-        return ['stack', 'sorting']
+        return ['stack', 'sorting', 'pick_place']
 
 
 def get_task_world(task_name, real=False):
@@ -528,8 +575,14 @@ def get_task_world(task_name, real=False):
             ti = np.random.randint(0, 4)
             # start by moving the eef to be on top of a tray
             self.action_move_to('traybox_%i' % ti)
+            
+    class PickPlace(TaskWorld):
+
+        def start_task(self):
+            self.lock_task_objects()
 
     factory_dict = {'sorting': Sorting,
-                    'stacking': Stacking}
+                    'stacking': Stacking,
+                    'pick_place': PickPlace}
 
     return factory_dict[task_name]

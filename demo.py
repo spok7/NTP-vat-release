@@ -33,7 +33,12 @@ def parse_args():
 
     parser.add_argument('--task', dest='task',
                         help='The task specification file',
-                        default='tasks/specs/stack/stack_2000.json', type=str)
+                        # default='tasks/specs/stack/stack_2000.json', type=str)
+                        default='tasks/specs/pick_place/pick_place_54.json', type=str)
+    
+    parser.add_argument('--save_trace', dest='save_trace',
+                        help='Specify the save location of the trace',
+                        default='trace.npy', type=str)
 
     args = parser.parse_args()
 
@@ -90,19 +95,26 @@ def main():
     bw.start_world()
 
     # iterate through tasks
+    traces = []
     for i, task in enumerate(task_config['tasks']):
         bw.set_task(task)
         bw.start_task()
         done = False
         # try until complete a task
         while not done:
-            out = t.expert_program_trace()
+            out = t.model_program_trace()
             if out:
+                if args.save_trace:
+                    traces.append(out)
                 done = True
                 assert(bw.task_done)
             bw.reset_world()
             bw.start_task()
             print((task['id']))
+            
+    if args.save_trace:
+        import numpy as np
+        np.save(args.save_trace, traces, allow_pickle=True)
 
     print('Terminating the simulation...')
     world.close()
