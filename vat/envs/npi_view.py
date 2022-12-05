@@ -33,6 +33,7 @@ class NPIView:
                        'caller_ptr': None,  # caller trace pointer
                        'callee_ptr': None
                        }
+        self.steps = 0
 
     def observe(self):
         raise NotImplementedError
@@ -243,26 +244,40 @@ class NPIView:
 
         return self.all_trace, serial_depth_trace, self.state_log
 
-    def call_model_helper(self, pname, args, caller_ptr=None, command=None):
-        """format the trace for the next program and call the expert program"""
-        # call the expert program
-        callee_trace = self.trace
-        callee_trace['caller_ptr'] = caller_ptr
-        callee_trace['adaptive'] = int(pname in self.ADAPTIVE)
-        callee_trace['in_prgs'] = self.program_to_ind[pname]
-        callee_trace['in_args'] = args if args else 0
-        callee_trace['in_boundary_begin'] = self.current_frame
-        callee_trace['cmd_in_boundary_begin'] = self.current_command
-        self.psid[pname] += 1
-        callee_trace['psid'] = self.psid[pname]
+    def call_model_helper(self, pname, args, depth=0):
+        """Call trained model """
+        assert self.model is not None 
+        if 1000 < self.steps or 10 < depth:
+            raise StopIteration()
 
-        if command:
-            self.command(command)
+        # Get initial pick & place task from world
         if pname == "pick_place":
             self.curr_task, n_remain = self.world.next_task()
-        self.expert_programs[pname](callee_trace)
-    
-    def model_program_trace(self, model=None):
+        
+        r = 0
+        while r < 0.5:
+            self.steps += 1
+            if 1000 < self.steps:
+                raise StopIteration()
+            obs = self.world.object_state
+            step_output = self.model.step(env_obs=obs,
+                                          program=pname,
+                                          args=args)
+            r = step_output.r
+            pid = step_output.program.id
+            args = 
+
+            if pname in self.ACT:
+                self.programs[pid](args, full_demo=self.full_demo)
+            else:
+                if pid != 0:
+                    self.call_model_helper(self.programs[pid][0],
+                                           step_output.arguments.decode_all(),
+                                           depth=depth+1)
+        
+        self.success = self.world.task_done
+
+    def model_program_trace(self):
         """
         entry point
         args:
@@ -296,10 +311,7 @@ class NPIView:
             if use == "no":
                 return None
 
-        self.trace_sanity_check()
-        serial_depth_trace = self.serialize_depth_trace()
-
-        return self.all_trace, serial_depth_trace, self.state_log
+        return 1
 
     def serialize_depth_trace(self):
         serial_trace = {}

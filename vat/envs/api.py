@@ -45,7 +45,7 @@ class Observer(threading.Thread):
 
 class FullAPI(NPIView):
 
-    def __init__(self, sw, full_demo=False, robot=False):
+    def __init__(self, sw, full_demo=False, robot=False, model=None):
         NPIView.__init__(self)
         self.world = sw
         self._state_log_tmp = {'object_states': [],
@@ -55,6 +55,7 @@ class FullAPI(NPIView):
         self.full_demo = full_demo
         self.target = None
         self.isrobot = robot
+        self.model = model
         if self.isrobot:
             self.stop_obs = False
 
